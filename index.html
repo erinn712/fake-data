@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>假資料生成工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微軟正黑體', sans-serif;
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #d6d3d1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #292524 0%, #1c1917 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(168, 162, 158, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #a8a29e;
+            font-weight: 400;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 40px;
+            border: 1px solid #d6d3d1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-title {
+            font-size: 1.25em;
+            margin-bottom: 24px;
+            color: #44403c;
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e7e5e4;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            border-color: #a8a29e;
+            box-shadow: 0 1px 4px rgba(120, 113, 108, 0.15);
+        }
+
+        .checkbox-item.checked {
+            border-color: #78716c;
+            background: #f5f5f4;
+        }
+
+        .checkbox-item input {
+            margin-right: 12px;
+            transform: scale(1.1);
+            accent-color: #78716c;
+        }
+
+        .checkbox-item label {
+            font-weight: 500;
+            cursor: pointer;
+            color: #44403c;
+            flex: 1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: #44403c;
+            color: white;
+            box-shadow: 0 1px 3px rgba(68, 64, 60, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #292524;
+            box-shadow: 0 2px 8px rgba(68, 64, 60, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f4;
+            color: #57534e;
+            border: 1px solid #d6d3d1;
+        }
+
+        .btn-secondary:hover {
+            background: #e7e5e4;
+            color: #44403c;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e7e5e4;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-card:hover {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+            border-color: #d6d3d1;
+            transform: translateY(-1px);
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
+            color: #44403c;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 1em;
+            border-bottom: 1px solid #e7e5e4;
+        }
+
+        .result-content {
+            padding: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-text {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #374151;
+            word-wrap: break-word;
+        }
+
+        .generate-btn {
+            background: #78716c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .generate-btn:hover {
+            background: #57534e;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #44403c 0%, #292524 100%);
+            color: white;
+            border: 1.5px solid #78716c;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-left: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #57534e 0%, #44403c 100%);
+            border-color: #a8a29e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e7e5e4;
+        }
+
+        .quantity-selector label {
+            font-weight: 500;
+            color: #44403c;
+        }
+
+        .quantity-selector select {
+            padding: 8px 12px;
+            border: 1px solid #d6d3d1;
+            border-radius: 6px;
+            font-size: 0.95em;
+            background: white;
+            color: #44403c;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            color: #a8a29e;
+            font-style: italic;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 假資料生成工具</h1>
+            <p>快速生成專案資料、客戶資訊等假資料，提升開發效率</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="control-title">📄 選擇要生成的資料類型</div>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="customerName" value="customerName">
+                        <label for="customerName">客戶姓名</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="companyName" value="companyName">
+                        <label for="companyName">公司名稱</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="address" value="address">
+                        <label for="address">地址</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="projectTheme" value="projectTheme">
+                        <label for="projectTheme">專案主題</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="projectContent" value="projectContent">
+                        <label for="projectContent">專案內容</label>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contactRecord" value="contactRecord">
+                        <label for="contactRecord">客戶連絡紀錄</label>
+                    </div>
+                </div>
+                
+                <div class="quantity-selector">
+                    <label for="quantitySelect">🔢 生成數量：</label>
+                    <select id="quantitySelect">
+                        <option value="1" selected>1組</option>
+                        <option value="2">2組</option>
+                        <option value="3">3組</option>
+                        <option value="4">4組</option>
+                        <option value="5">5組</option>
+                        <option value="6">6組</option>
+                        <option value="7">7組</option>
+                        <option value="8">8組</option>
+                        <option value="9">9組</option>
+                        <option value="10">10組</option>
+                    </select>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateSelected()">🎯 生成選中項目</button>
+                    <button class="btn btn-secondary" onclick="selectAll()">☑️ 全選</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">🗑️ 清除所有</button>
+                </div>
+            </div>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-header">👤 客戶姓名</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="customerNameResult">點擊生成按鈕來產生客戶姓名</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('customerName')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('customerNameResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">🏢 公司名稱</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="companyNameResult">點擊生成按鈕來產生公司名稱</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('companyName')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('companyNameResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">📍 地址</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="addressResult">點擊生成按鈕來產生地址</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('address')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('addressResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">🎨 專案主題</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="projectThemeResult">點擊生成按鈕來產生專案主題</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('projectTheme')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('projectThemeResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">📝 專案內容</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="projectContentResult">點擊生成按鈕來產生專案內容</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('projectContent')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('projectContentResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">📞 客戶連絡紀錄</div>
+                    <div class="result-content">
+                        <div class="result-text empty-state" id="contactRecordResult">點擊生成按鈕來產生客戶連絡紀錄</div>
+                    </div>
+                    <div style="padding: 0 20px 15px;">
+                        <button class="generate-btn" onclick="generateSingle('contactRecord')">單獨生成</button>
+                        <button class="copy-btn" onclick="copyResult('contactRecordResult', event)" title="複製內容">📄</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 假資料庫 - 關聯性資料結構
+        const fakeData = {
+            // 專案主題與相對應的內容和聯絡紀錄
+            projects: [
+                {
+                    theme: "智慧家居控制系統",
+                    content: "整合IoT設備控制介面，實現語音與手機遠程操作",
+                    contactRecord: "客戶希望增加智能安防功能，已排程技術評估會議，預計下週提供完整解決方案與報價單"
+                },
+                {
+                    theme: "線上購物平台",
+                    content: "建立電商網站架構，整合金流與物流系統",
+                    contactRecord: "討論購物車功能優化需求，客戶要求支援多種付款方式，正在評估第三方金流整合方案"
+                },
+                {
+                    theme: "健康管理APP",
+                    content: "開發個人健康追蹤功能，整合穿戴設備數據",
+                    contactRecord: "客戶詢問數據隱私保護機制，已提供GDPR合規說明文件，預計本週完成隱私政策制定"
+                },
+                {
+                    theme: "企業資源管理系統",
+                    content: "設計ERP模組架構，優化企業流程自動化",
+                    contactRecord: "洽談系統客製化需求，客戶希望整合現有HR系統，正在進行技術相容性分析評估"
+                },
+                {
+                    theme: "社群媒體平台",
+                    content: "實現即時聊天與動態發布功能，提升用戶互動",
+                    contactRecord: "客戶要求增加直播功能模組，已安排產品經理進行需求訪談，預估開發時程約三個月"
+                },
+                {
+                    theme: "線上教育平台",
+                    content: "建立課程管理系統，支援多媒體教學內容",
+                    contactRecord: "討論學習進度追蹤功能，客戶希望加入AI智能推薦課程，正在研究機器學習演算法整合"
+                },
+                {
+                    theme: "餐飲預訂系統",
+                    content: "開發訂位管理介面，整合POS系統與會員機制",
+                    contactRecord: "客戶反映尖峰時段系統回應較慢，已排程資料庫效能優化作業，預計週末進行系統維護"
+                },
+                {
+                    theme: "旅遊規劃網站",
+                    content: "設計行程規劃工具，整合地圖API與天氣資訊",
+                    contactRecord: "洽談國際旅遊套裝服務整合，客戶要求多語言支援功能，正在評估本地化開發成本"
+                },
+                {
+                    theme: "財務管理工具",
+                    content: "建立個人記帳系統，提供財務分析報表功能",
+                    contactRecord: "客戶詢問銀行API串接可行性，已聯繫合作金融機構，預計下月簽署技術合作備忘錄"
+                },
+                {
+                    theme: "電商物流系統",
+                    content: "優化倉儲管理流程，實現即時庫存追蹤",
+                    contactRecord: "討論配送路線優化演算法，客戶希望降低物流成本15%，正在開發智能派送調度系統"
+                },
+                {
+                    theme: "醫療預約平台",
+                    content: "設計掛號預約介面，整合醫院HIS系統",
+                    contactRecord: "客戶要求加入遠距醫療諮詢功能，已完成法規合規性評估，預計下週進行系統架構設計"
+                },
+                {
+                    theme: "房地產交易平台",
+                    content: "建立物件搜尋系統，提供VR看房體驗功能",
+                    contactRecord: "洽談房貸試算工具整合，客戶希望與銀行建立合作關係，正在準備商業合作提案文件"
+                },
+                {
+                    theme: "數位行銷工具",
+                    content: "開發社群媒體管理介面，提供數據分析儀表板",
+                    contactRecord: "客戶需要整合Google Analytics API，已完成技術可行性評估，預計兩週內完成開發整合"
+                },
+                {
+                    theme: "雲端存儲服務",
+                    content: "設計檔案同步機制，確保多裝置資料一致性",
+                    contactRecord: "討論企業級安全認證需求，客戶要求ISO27001合規，正在準備資安稽核相關文件準備"
+                },
+                {
+                    theme: "遊戲社交平台",
+                    content: "實現多人線上對戰功能，建立玩家社群系統",
+                    contactRecord: "客戶希望加入遊戲直播與錄影分享功能，已安排UI/UX設計師進行使用者體驗研究"
+                },
+                {
+                    theme: "智慧農業系統",
+                    content: "整合感測器監控，提供作物生長數據分析",
+                    contactRecord: "洽談無人機巡田功能整合，客戶要求即時影像傳輸，正在評估5G網路建置需求"
+                },
+                {
+                    theme: "在線會議工具",
+                    content: "開發視訊會議功能，支援畫面分享與錄影",
+                    contactRecord: "客戶反映會議室預約功能需要改善，已安排產品團隊重新設計使用者介面流程"
+                },
+                {
+                    theme: "數據分析平台",
+                    content: "建立大數據處理引擎，提供即時報表生成",
+                    contactRecord: "討論機器學習模組整合需求，客戶希望加入預測分析功能，正在評估AI演算法選型方案"
+                },
+                {
+                    theme: "IoT設備管理",
+                    content: "設計設備監控介面，實現遠程控制與診斷",
+                    contactRecord: "客戶要求支援更多設備協定標準，已開始研究Zigbee與LoRa整合技術可行性評估"
+                },
+                {
+                    theme: "區塊鏈應用",
+                    content: "開發智能合約系統，確保交易透明與安全",
+                    contactRecord: "洽談數位資產管理功能，客戶關注監管合規問題，正在研究相關法規與技術實作方案"
+                },
+                {
+                    theme: "人工智慧助理",
+                    content: "建立自然語言處理模組，提供智能客服功能",
+                    contactRecord: "客戶希望整合語音識別技術，已安排AI專家進行技術評估，預計下月提供完整開發計畫"
+                },
+                {
+                    theme: "擴增實境購物",
+                    content: "開發AR試穿試戴功能，提升線上購物體驗",
+                    contactRecord: "討論3D模型建置需求，客戶要求支援多種設備平台，正在評估跨平台開發框架選型"
+                },
+                {
+                    theme: "智能停車系統",
+                    content: "設計車位偵測與導航系統，優化停車場管理",
+                    contactRecord: "客戶詢問車牌辨識準確率，已提供測試數據報告，預計本週安排現場示範展示"
+                },
+                {
+                    theme: "線上直播平台",
+                    content: "實現高畫質串流技術，支援多人互動直播",
+                    contactRecord: "洽談CDN架構優化方案，客戶要求支援4K畫質，正在評估頻寬成本與技術可行性"
+                },
+                {
+                    theme: "數位錢包系統",
+                    content: "建立安全支付機制，整合多種電子支付方式",
+                    contactRecord: "客戶關注資安防護等級，已排程滲透測試驗證，預計下週提供完整安全評估報告"
+                },
+                {
+                    theme: "智慧製造管理",
+                    content: "開發生產線監控系統，實現工業4.0自動化",
+                    contactRecord: "討論設備聯網標準整合，客戶希望降低停機時間20%，正在設計預測性維護演算法"
+                },
+                {
+                    theme: "虛擬健身教練",
+                    content: "設計動作辨識AI系統，提供個人化運動指導",
+                    contactRecord: "客戶要求加入心率監測整合，已聯繫穿戴設備廠商，預計月底完成技術合作洽談"
+                },
+                {
+                    theme: "智慧能源管理",
+                    content: "建立用電分析平台，優化能源使用效率",
+                    contactRecord: "洽談太陽能發電系統整合，客戶希望實現碳中和目標，正在規劃綠能轉型實施方案"
+                },
+                {
+                    theme: "線上心理諮商",
+                    content: "開發安全通訊平台，提供遠距心理健康服務",
+                    contactRecord: "客戶詢問隱私保護機制，已完成HIPAA合規性評估，預計下週提交認證申請文件"
+                },
+                {
+                    theme: "智慧交通號誌",
+                    content: "設計車流偵測系統，動態調整交通燈號時序",
+                    contactRecord: "討論與交通局系統整合，客戶要求減少交通壅塞30%，正在進行交通流量分析建模"
+                },
+                {
+                    theme: "3D列印服務平台",
+                    content: "建立客製化製造系統，提供線上3D列印訂製",
+                    contactRecord: "客戶希望支援更多材質選項，已聯繫材料供應商，預計下月擴展金屬列印服務項目"
+                },
+                {
+                    theme: "智慧寵物照護",
+                    content: "開發寵物健康監控APP，整合獸醫線上諮詢",
+                    contactRecord: "洽談寵物晶片資料整合，客戶要求建立完整健康檔案，正在設計寵物身分識別系統"
+                },
+                {
+                    theme: "無人機配送系統",
+                    content: "設計自主飛行路徑規劃，實現最後一哩配送",
+                    contactRecord: "客戶關注飛行安全認證，已開始申請民航局許可，預計半年內完成商用飛行測試"
+                },
+                {
+                    theme: "智慧溫室管理",
+                    content: "建立環境控制自動化系統，優化作物生長條件",
+                    contactRecord: "討論AI病蟲害預警功能，客戶希望提高產量25%，正在開發植物影像識別演算法"
+                },
+                {
+                    theme: "虛擬試衣間",
+                    content: "開發3D身型掃描技術，提供精準服飾試穿",
+                    contactRecord: "客戶要求整合電商平台API，已完成技術對接測試，預計本月底上線beta版本"
+                },
+                {
+                    theme: "智慧垃圾分類",
+                    content: "設計影像辨識回收系統，自動分類廢棄物",
+                    contactRecord: "洽談環保局合作計畫，客戶希望提升回收率40%，正在訓練垃圾分類深度學習模型"
+                },
+                {
+                    theme: "數位藝術拍賣",
+                    content: "建立NFT交易平台，支援數位藝術品拍賣",
+                    contactRecord: "客戶詢問智能合約安全性，已安排區塊鏈專家進行代碼審計，預計下週提供審計報告"
+                },
+                {
+                    theme: "智慧水質監測",
+                    content: "開發即時水質檢測系統，確保飲用水安全",
+                    contactRecord: "討論物聯網感測器部署方案，客戶要求24小時監控，正在設計異常警報通知機制"
+                },
+                {
+                    theme: "線上法律諮詢",
+                    content: "建立法律文件智能分析系統，提供法律建議",
+                    contactRecord: "客戶關注法條更新自動化，已建立法規資料庫同步機制，預計每月自動更新法律條文"
+                },
+                {
+                    theme: "智慧建築管理",
+                    content: "設計大樓自動化控制系統，整合安防與節能",
+                    contactRecord: "洽談BIM模型整合需求，客戶希望降低營運成本35%，正在評估智慧化改造投資效益"
+                }
+            ],
+            
+            surnames: ["陳", "林", "黃", "張", "李", "王", "吳", "劉", "蔡", "楊", "許", "鄭", "謝", "郭", "洪", "邱", "曾", "廖", "賴", "徐", "周", "羅", "梁", "顏", "柯", "翁", "戴", "潘", "范", "鍾", "游", "詹", "施", "馬", "董", "溫", "唐", "方", "石", "姚", "白", "康", "趙", "孫", "高", "田", "胡", "沈", "余", "盧", "江", "何", "蕭", "宋", "侯", "魏", "毛", "薛", "袁", "韓", "葉", "鄒", "史", "萬", "錢", "湯", "黎", "易", "常", "武", "喬", "賀", "嚴", "尹", "錢", "施", "牛", "洪", "龔"],
+            firstNames: ["志明", "美惠", "建宏", "淑芬", "俊傑", "雅婷", "家豪", "怡君", "宗翰", "佩君", "承翰", "心怡", "冠廷", "欣怡", "彥廷", "筱涵", "宏達", "郁婷", "俊宏", "雅文", "淑華", "建志", "麗華", "文雄", "美玲", "志偉", "淑貞", "建國", "麗娟", "文華", "美芳", "志強", "淑惠", "建華", "麗雲", "文龍", "美娟", "志宏", "淑玲", "建民", "麗珍", "文傑", "美慧", "志成", "淑芬", "建勳", "麗芳", "文賢", "美琪", "志豪", "淑敏", "建忠", "麗萍", "文良", "美君", "志遠", "淑慧", "建德", "麗英", "文斌", "美蓉", "志勇", "淑芳", "建霖", "麗華", "文輝", "美如", "志興", "淑娟", "建男", "麗君", "文正", "美娟", "志維", "淑玉", "建和", "麗芬", "文凱", "美智", "志安", "淑真", "建宇", "麗容", "文祥", "美琳", "志峰", "淑美", "建銘", "麗香", "文博", "美芸", "志煒", "淑雯", "建誠", "麗卿", "文豪", "美秀", "志翰", "淑儀", "建榮", "麗瑛", "文欽", "美鳳", "志豪", "淑萍", "建元", "麗霞", "文昌", "美靜", "志弘", "淑珍", "子涵", "思妤", "品妍", "宇軒", "芷瑄", "睿恩", "品岑", "承恩", "芯語", "睿澤", "芯妍", "宇恩", "語彤", "承澤", "芯瑜", "品瑜", "睿宇", "芯妤", "宇澤", "語涵", "品恩", "芯語", "睿妍", "宇妍", "語妍", "芯瑄", "品語", "睿涵", "宇涵", "語澤", "芯澤", "品澤", "睿語", "宇語", "語恩", "芯恩", "品恩", "睿恩", "宇恩", "語妤", "芯妤", "品妤", "睿妤", "宇妤", "沐恩", "沐澤", "沐語", "沐妍", "沐涵", "昱恩", "昱澤", "昱語", "昱妍", "昱涵", "梓恩", "梓澤", "梓語", "梓妍", "梓涵", "宸恩", "宸澤", "宸語", "宸妍", "宸涵", "晨恩", "晨澤", "晨語", "晨妍", "晨涵", "澄恩", "澄澤", "澄語", "澄妍", "澄涵", "澂恩", "澂澤", "澂語", "澂妍", "澂涵", "宥恩", "宥澤", "宥語", "宥妍", "宥涵", "恩澤", "恩語", "恩妍", "恩涵", "恩妤", "澤語", "澤妍", "澤涵", "澤妤", "澤恩", "語妍", "語涵", "語妤", "語恩", "語澤", "妍涵", "妍妤", "妍恩", "妍澤", "妍語", "涵妤", "涵恩", "涵澤", "涵語", "涵妍", "妤恩", "妤澤", "妤語", "妤妍", "妤涵"],
+            
+            companyPrefixes: ["台灣", "國際", "環球", "亞太", "大中華", "東亞", "遠東", "中華", "聯合", "統一", "全球", "世界", "宏達", "巨大", "超級", "頂級", "優質", "精品", "高端", "先進", "現代", "未來", "新世代", "永續", "綠能", "智能", "雲端", "數據", "創意", "專業", "菁英", "卓越", "傑出", "領先", "創新", "革命", "突破", "飛躍", "躍進", "超越", "極致", "完美", "理想", "夢想", "希望", "光明", "輝煌", "榮耀", "成功", "勝利", "冠軍", "第一", "唯一", "獨特", "特殊", "稀有", "珍貴", "寶貴", "無價", "金牌", "白金", "鑽石", "皇家", "帝王", "貴族", "名門", "世家", "傳承", "經典", "永恆", "不朽", "傳奇", "神話", "奇蹟", "驚奇", "魔法", "神奇", "奇幻", "夢幻", "浪漫", "詩意", "藝術", "美學", "時尚", "潮流", "前衛", "酷炫", "炫目", "璀璨", "閃耀", "星光", "月亮", "太陽", "彩虹", "極光", "銀河", "宇宙", "無限", "永恆", "新興", "朝陽", "旭日", "晨曦", "黃昏", "夕陽", "星辰", "流星", "彗星", "行星"],
+            companyMidwords: ["科技", "資訊", "系統", "網路", "數位", "智慧", "創新", "精密", "工業", "貿易", "製造", "生產", "開發", "研發", "設計", "規劃", "建設", "工程", "技術", "服務", "管理", "顧問", "諮詢", "投資", "金融", "保險", "銀行", "證券", "基金", "信託", "租賃", "物流", "運輸", "倉儲", "配送", "快遞", "郵政", "通訊", "電信", "廣播", "媒體", "出版", "印刷", "廣告", "行銷", "公關", "品牌", "形象", "策略", "企劃", "營運", "營銷", "銷售", "採購", "供應", "零售", "批發", "代理", "經銷", "連鎖", "加盟", "特許", "授權", "合作", "聯盟", "整合", "併購", "重組", "轉型", "升級", "優化", "改善", "提升", "強化", "擴展", "發展", "成長", "壯大", "躍進", "突破", "創造", "建立", "打造", "塑造", "培育", "孵化", "加速", "推動", "促進", "支援", "協助", "輔導", "指導", "培訓", "教育", "學習", "研究", "探索", "發現", "創意", "靈感", "想像", "夢想", "願景", "目標", "使命", "價值", "文化", "精神", "理念", "哲學", "思想", "智慧", "知識", "經驗", "專業", "技能", "才能", "天賦", "潛力", "能力", "實力", "競爭", "優勢", "特色", "特點"],
+            companySuffixes: ["有限公司", "股份有限公司", "企業有限公司", "國際有限公司", "集團", "公司", "事業股份有限公司", "投資股份有限公司", "控股股份有限公司", "科技股份有限公司", "實業股份有限公司", "貿易股份有限公司", "工業股份有限公司", "開發股份有限公司", "建設股份有限公司", "資訊股份有限公司", "系統股份有限公司", "網路股份有限公司", "數位股份有限公司", "創新股份有限公司", "設計股份有限公司", "顧問股份有限公司", "服務股份有限公司", "管理股份有限公司", "營運股份有限公司", "行銷股份有限公司", "廣告股份有限公司", "媒體股份有限公司", "出版股份有限公司", "教育股份有限公司", "文化股份有限公司", "娛樂股份有限公司", "休閒股份有限公司", "旅遊股份有限公司", "餐飲股份有限公司", "零售股份有限公司", "物流股份有限公司", "運輸股份有限公司", "倉儲股份有限公司", "金融股份有限公司", "保險股份有限公司", "證券股份有限公司", "投顧股份有限公司", "期貨股份有限公司", "銀行股份有限公司", "信託股份有限公司", "租賃股份有限公司", "不動產股份有限公司", "建築股份有限公司", "營造股份有限公司", "機械股份有限公司", "電子股份有限公司", "電機股份有限公司", "光電股份有限公司", "半導體股份有限公司", "通訊股份有限公司", "軟體股份有限公司", "遊戲股份有限公司", "影音股份有限公司", "多媒體股份有限公司"],
+            
+            cities: ["台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市", "新竹市", "嘉義市"],
+            districts: {
+                "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
+                "新北市": ["板橋區", "三重區", "中和區", "永和區", "新莊區", "新店區", "樹林區", "鶯歌區", "三峽區", "淡水區"],
+                "桃園市": ["桃園區", "中壢區", "大溪區", "楊梅區", "蘆竹區", "大園區", "龜山區", "八德區", "龍潭區", "平鎮區"],
+                "台中市": ["中區", "東區", "南區", "西區", "北區", "西屯區", "南屯區", "北屯區", "豐原區", "大里區"],
+                "台南市": ["中西區", "東區", "南區", "北區", "安平區", "安南區", "永康區", "歸仁區", "新化區", "左鎮區"],
+                "高雄市": ["新興區", "前金區", "苓雅區", "鹽埕區", "鼓山區", "旗津區", "前鎮區", "三民區", "楠梓區", "小港區"],
+                "新竹市": ["東區", "北區", "香山區"],
+                "嘉義市": ["東區", "西區"]
+            },
+            roads: ["中山路", "中正路", "民族路", "建國路", "復興路", "和平路", "信義路", "仁愛路", "忠孝路", "光復路", "民權路", "自由路", "博愛路", "三民路", "中華路", "文化路", "學府路", "大同路", "公園路", "勝利路"]
+        };
+
+        // 全局變數來追蹤當前選中的專案
+        let currentProject = null;
+        
+        // 生成函數
+        function generateProjectTheme() {
+            currentProject = getRandomItem(fakeData.projects);
+            return currentProject.theme;
+        }
+
+        function generateProjectContent() {
+            if (currentProject) {
+                return currentProject.content;
+            } else {
+                currentProject = getRandomItem(fakeData.projects);
+                return currentProject.content;
+            }
+        }
+
+        function generateContactRecord() {
+            if (currentProject) {
+                return currentProject.contactRecord;
+            } else {
+                currentProject = getRandomItem(fakeData.projects);
+                return currentProject.contactRecord;
+            }
+        }
+
+        function generateCustomerName() {
+            const surname = getRandomItem(fakeData.surnames);
+            const firstName = getRandomItem(fakeData.firstNames);
+            return surname + firstName;
+        }
+
+        function generateCompanyName() {
+            const prefix = getRandomItem(fakeData.companyPrefixes);
+            const midword = getRandomItem(fakeData.companyMidwords);
+            const suffix = getRandomItem(fakeData.companySuffixes);
+            return prefix + midword + suffix;
+        }
+
+        function generateAddress() {
+            const city = getRandomItem(fakeData.cities);
+            const district = getRandomItem(fakeData.districts[city]);
+            const road = getRandomItem(fakeData.roads);
+            const number = Math.floor(Math.random() * 999) + 1;
+            const floor = Math.floor(Math.random() * 20) + 1;
+            
+            return `${city}${district}${road}${number}號${floor}樓`;
+        }
+
+        // 工具函數
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // 生成特定項目
+        function generateSingle(type) {
+            let result = '';
+            switch(type) {
+                case 'projectTheme':
+                    result = generateProjectTheme();
+                    break;
+                case 'projectContent':
+                    result = generateProjectContent();
+                    break;
+                case 'contactRecord':
+                    result = generateContactRecord();
+                    break;
+                case 'customerName':
+                    result = generateCustomerName();
+                    break;
+                case 'companyName':
+                    result = generateCompanyName();
+                    break;
+                case 'address':
+                    result = generateAddress();
+                    break;
+            }
+            
+            const resultElement = document.getElementById(type + 'Result');
+            resultElement.textContent = result;
+            resultElement.classList.remove('empty-state');
+        }
+
+        // 生成選中的項目
+        function generateSelected() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let hasSelected = false;
+            const selectedTypes = [];
+            const quantity = parseInt(document.getElementById('quantitySelect').value);
+            
+            // 收集所有選中的項目
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedTypes.push(checkbox.value);
+                    hasSelected = true;
+                }
+            });
+            
+            if (!hasSelected) {
+                alert('請至少選擇一個項目來生成！');
+                return;
+            }
+            
+            // 清空未勾選的項目
+            clearUnselectedItems(selectedTypes);
+            
+            // 按優先順序生成，確保專案主題先生成
+            const priorityOrder = ['customerName', 'companyName', 'address', 'projectTheme', 'projectContent', 'contactRecord'];
+            
+            // 生成多組資料
+            const results = {};
+            
+            for (let i = 0; i < quantity; i++) {
+                // 檢查是否包含專案相關項目，如果是的話重置currentProject確保關聯性
+                const projectRelatedTypes = ['projectTheme', 'projectContent', 'contactRecord'];
+                const hasProjectTypes = selectedTypes.some(type => projectRelatedTypes.includes(type));
+                
+                if (hasProjectTypes) {
+                    currentProject = null; // 重置，讓第一個專案相關項目決定專案
+                }
+                
+                priorityOrder.forEach(type => {
+                    if (selectedTypes.includes(type)) {
+                        if (!results[type]) {
+                            results[type] = [];
+                        }
+                        
+                        let result = '';
+                        switch(type) {
+                            case 'projectTheme':
+                                result = generateProjectTheme();
+                                break;
+                            case 'projectContent':
+                                result = generateProjectContent();
+                                break;
+                            case 'contactRecord':
+                                result = generateContactRecord();
+                                break;
+                            case 'customerName':
+                                result = generateCustomerName();
+                                break;
+                            case 'companyName':
+                                result = generateCompanyName();
+                                break;
+                            case 'address':
+                                result = generateAddress();
+                                break;
+                        }
+                        
+                        results[type].push(result);
+                    }
+                });
+            }
+            
+            // 顯示結果
+            Object.keys(results).forEach(type => {
+                const resultElement = document.getElementById(type + 'Result');
+                if (quantity === 1) {
+                    resultElement.textContent = results[type][0];
+                } else {
+                    resultElement.innerHTML = results[type].map((item, index) => 
+                        `<div style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="flex: 1; margin-right: 15px;"><strong>${index + 1}.</strong> ${item}</span>
+                            <button class="copy-btn" onclick="copyTextFromElement(this.previousElementSibling)" title="複製這項內容" style="margin: 0; padding: 4px 8px; font-size: 0.8em; flex-shrink: 0;">📄</button>
+                        </div>`
+                    ).join('');
+                }
+                resultElement.classList.remove('empty-state');
+            });
+        }
+        
+        // 清空未勾選的項目
+        function clearUnselectedItems(selectedTypes) {
+            const allTypes = ['projectTheme', 'projectContent', 'contactRecord', 'customerName', 'companyName', 'address'];
+            
+            allTypes.forEach(type => {
+                if (!selectedTypes.includes(type)) {
+                    const resultElement = document.getElementById(type + 'Result');
+                    let placeholder = '';
+                    switch(type) {
+                        case 'projectTheme':
+                            placeholder = '點擊生成按鈕來產生專案主題';
+                            break;
+                        case 'projectContent':
+                            placeholder = '點擊生成按鈕來產生專案內容';
+                            break;
+                        case 'contactRecord':
+                            placeholder = '點擊生成按鈕來產生客戶連絡紀錄';
+                            break;
+                        case 'customerName':
+                            placeholder = '點擊生成按鈕來產生客戶姓名';
+                            break;
+                        case 'companyName':
+                            placeholder = '點擊生成按鈕來產生公司名稱';
+                            break;
+                        case 'address':
+                            placeholder = '點擊生成按鈕來產生地址';
+                            break;
+                    }
+                    resultElement.textContent = placeholder;
+                    resultElement.classList.add('empty-state');
+                }
+            });
+        }
+
+        // 全選
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.parentElement.classList.add('checked');
+            });
+        }
+
+        // 清除所有
+        function clearAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.parentElement.classList.remove('checked');
+            });
+            
+            // 清除所有結果
+            const resultElements = document.querySelectorAll('[id$="Result"]');
+            resultElements.forEach(element => {
+                const type = element.id.replace('Result', '');
+                let placeholder = '';
+                switch(type) {
+                    case 'projectTheme':
+                        placeholder = '點擊生成按鈕來產生專案主題';
+                        break;
+                    case 'projectContent':
+                        placeholder = '點擊生成按鈕來產生專案內容';
+                        break;
+                    case 'contactRecord':
+                        placeholder = '點擊生成按鈕來產生客戶連絡紀錄';
+                        break;
+                    case 'customerName':
+                        placeholder = '點擊生成按鈕來產生客戶姓名';
+                        break;
+                    case 'companyName':
+                        placeholder = '點擊生成按鈕來產生公司名稱';
+                        break;
+                    case 'address':
+                        placeholder = '點擊生成按鈕來產生地址';
+                        break;
+                }
+                element.textContent = placeholder;
+                element.classList.add('empty-state');
+            });
+        }
+
+        // 複製結果內容（整個區域）
+        function copyResult(resultId, event) {
+            const resultElement = document.getElementById(resultId);
+            let text = '';
+            
+            // 如果是多行內容，提取純文字
+            if (resultElement.innerHTML.includes('<div')) {
+                const items = resultElement.querySelectorAll('span');
+                if (items.length > 0) {
+                    text = Array.from(items).map(span => {
+                        // 移除編號部分
+                        return span.textContent.replace(/^\d+\.\s*/, '');
+                    }).join('\n');
+                } else {
+                    // 如果沒有找到 span，直接取文字內容
+                    text = resultElement.textContent || resultElement.innerText;
+                }
+            } else {
+                text = resultElement.textContent || resultElement.innerText;
+            }
+            
+            // 清理文字，移除多餘的空白和換行
+            text = text.trim();
+            
+            if (text && text.length > 0 && !text.includes('點擊生成按鈕')) {
+                navigator.clipboard.writeText(text).then(function() {
+                    // 顯示複製成功的提示
+                    const copyBtn = event ? event.target : null;
+                    if (copyBtn) {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = '✅';
+                        copyBtn.style.background = 'linear-gradient(135deg, #a3a3a3 0%, #737373 100%)';
+                        
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                            copyBtn.style.background = 'linear-gradient(135deg, #44403c 0%, #292524 100%)';
+                        }, 1000);
+                    }
+                }).catch(function(err) {
+                    console.error('複製失敗:', err);
+                    alert('複製失敗：' + err.message);
+                });
+            } else {
+                alert('沒有內容可以複製！請先生成資料。');
+            }
+        }
+        
+        // 複製單一項目內容（從元素中提取）
+        function copyTextFromElement(spanElement) {
+            const text = spanElement.textContent.replace(/^\d+\.\s*/, '').trim(); // 移除編號並清理空白
+            
+            if (text && text.length > 0) {
+                navigator.clipboard.writeText(text).then(function() {
+                    // 顯示複製成功的提示
+                    const buttonElement = spanElement.nextElementSibling;
+                    const originalText = buttonElement.textContent;
+                    buttonElement.textContent = '✅';
+                    buttonElement.style.background = 'linear-gradient(135deg, #a3a3a3 0%, #737373 100%)';
+                    
+                    setTimeout(() => {
+                        buttonElement.textContent = originalText;
+                        buttonElement.style.background = 'linear-gradient(135deg, #44403c 0%, #292524 100%)';
+                    }, 1000);
+                }).catch(function(err) {
+                    console.error('複製失敗:', err);
+                    alert('複製失敗，請手動選取文字複製');
+                });
+            } else {
+                alert('沒有內容可以複製！');
+            }
+        }
+
+        // 為勾選框添加視覺效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                const item = checkbox.closest('.checkbox-item');
+                
+                // 勾選框狀態改變時更新視覺效果
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        item.classList.add('checked');
+                    } else {
+                        item.classList.remove('checked');
+                    }
+                });
+                
+                // 初始化視覺狀態
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
